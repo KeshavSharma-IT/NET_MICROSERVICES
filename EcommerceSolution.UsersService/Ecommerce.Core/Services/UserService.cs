@@ -32,23 +32,25 @@ namespace Ecommerce.Core.Services
             return _mapper.Map<AuthenticationResponse>(User) with { Success = true, Token = "token" };
         }
 
-        public async Task<AuthenticationResponse?> Register(RegisterRequest request)
+        public async Task<AuthenticationResponse?> Register(RegisterRequest registerRequest)
         {
-            ApplicationUser User =  new ApplicationUser()
-            {
-                Password = request.Password,
-                PersonName = request.PersonName,
-                Email = request.Email,
-                Gender = request.Gender.ToString(),
-            };
+            //ApplicationUser User =  new ApplicationUser()
+            //{
+            //    Password = request.Password,
+            //    PersonName = request.PersonName,
+            //    Email = request.Email,
+            //    Gender = request.Gender.ToString(),
+            //};              using mapper for this below
 
-           ApplicationUser? registerUser= await _usersRepository.AddUser(User);
+            ApplicationUser user = _mapper.Map<ApplicationUser>(registerRequest);
+
+            ApplicationUser? registerUser= await _usersRepository.AddUser(user);
 
             if (registerUser == null) return null;
 
             //return new AuthenticationResponse(registerUser.UserID,registerUser.Email, registerUser.Gender, registerUser.PersonName, "token",  true);
 
-            return _mapper.Map<AuthenticationResponse>(User) with { Success = true, Token = "token" };
+            return _mapper.Map<AuthenticationResponse>(registerUser) with { Success = true, Token = "token" };
         }
     }
 }

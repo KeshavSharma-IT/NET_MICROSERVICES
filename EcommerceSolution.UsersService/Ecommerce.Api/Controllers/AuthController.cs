@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Core.DTO;
 using Ecommerce.Core.IService;
+using Ecommerce.Core.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,8 +33,11 @@ namespace Ecommerce.Api.Controllers
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
-        {
-            if (loginRequest == null) { return BadRequest("Invalid Login Data"); }
+        {   var validator=new LoginRequestValidator();
+            var ValidationResult=await validator.ValidateAsync(loginRequest);
+            if(!ValidationResult.IsValid) return BadRequest(ValidationResult.Errors.Select(e=>e.ErrorMessage));
+
+            //if (loginRequest == null) { return BadRequest("Invalid Login Data"); }
 
           AuthenticationResponse? authenticationResponse  = await _service.Login(loginRequest);
 

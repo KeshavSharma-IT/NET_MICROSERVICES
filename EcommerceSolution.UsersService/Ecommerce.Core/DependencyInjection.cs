@@ -1,5 +1,7 @@
 ﻿using Ecommerce.Core.IService;
 using Ecommerce.Core.Services;
+using Ecommerce.Core.Validators;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -18,6 +20,9 @@ public static class DependencyInjection
     public static IServiceCollection AddCore(this IServiceCollection service)
     {
         service.AddTransient<IUsersService, UserService>();
+
+       
+        service.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
         return service;
     }

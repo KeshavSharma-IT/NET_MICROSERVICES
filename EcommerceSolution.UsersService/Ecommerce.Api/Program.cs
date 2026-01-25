@@ -4,6 +4,7 @@ using Ecommerce.Api.Middleware;
 using System.Text.Json.Serialization;
 using Ecommerce.Core.Entities;
 using Ecommerce.Core.Mappers;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddAutoMapper(typeof(ApplicationUserMappingProfile).Assembly);
+
+//FluentValidation
+//builder.Services.AddValidatorsFromAssemblies(new[] { typeof(Program).Assembly });
+
+
 
 var app = builder.Build();
 

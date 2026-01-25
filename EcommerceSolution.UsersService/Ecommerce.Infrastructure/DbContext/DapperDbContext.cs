@@ -11,18 +11,18 @@ namespace Ecommerce.Infrastructure.DbContext
     {
         private readonly IConfiguration _configuration;
         private readonly IDbConnection _connection;
-        public DapperDbContext(IConfiguration configuration) {
-           
-           _configuration = configuration;
-            string connectionString = _configuration.GetConnectionString("Postgres");
 
-            //create NpgSql connection with the retrieved connection string
+        public DapperDbContext(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            string? connectionString = _configuration.GetConnectionString("Postgres");
 
-            _connection= new NpgsqlConnection(connectionString);
+            //Create a new NpgsqlConnection with the retrieved connection string
+            _connection = new NpgsqlConnection(connectionString);
         }
 
 
-        public IDbConnection DbConnection=>_connection;
+        public IDbConnection DbConnection => _connection;
 
     }
 }
