@@ -32,6 +32,7 @@ namespace Ecommerce.Core.Services
             return _mapper.Map<AuthenticationResponse>(User) with { Success = true, Token = "token" };
         }
 
+
         public async Task<AuthenticationResponse?> Register(RegisterRequest registerRequest)
         {
             //ApplicationUser User =  new ApplicationUser()

@@ -37,13 +37,13 @@ namespace Ecommerce.Api.Controllers
             var ValidationResult=await validator.ValidateAsync(loginRequest);
             if(!ValidationResult.IsValid) return BadRequest(ValidationResult.Errors.Select(e=>e.ErrorMessage));
 
-            //if (loginRequest == null) { return BadRequest("Invalid Login Data"); }
+                
 
           AuthenticationResponse? authenticationResponse  = await _service.Login(loginRequest);
 
             if (authenticationResponse == null || authenticationResponse.Success == false)
             {
-                return BadRequest(authenticationResponse);
+                return Unauthorized(authenticationResponse);
             }
 
             return Ok(authenticationResponse);

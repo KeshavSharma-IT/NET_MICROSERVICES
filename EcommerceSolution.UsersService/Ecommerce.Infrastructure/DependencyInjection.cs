@@ -19,7 +19,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection service)
     {
 
-        service.AddSingleton<IUsersRepository, UserRepositories>();
+        service.AddTransient<IUsersRepository, UserRepositories>();
         service.AddTransient<DapperDbContext>();
         return service;
     }
