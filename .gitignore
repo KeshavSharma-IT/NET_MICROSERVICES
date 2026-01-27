@@ -14,7 +14,7 @@
 *.userprefs
 
 **/Ecommerce.Api/appsettings.json
-**/eCommerceSolution.ProductService/ProductMicroService.Api/appsettings.json
+**/ProductMicroService.Api/appsettings.json
 
 
 # Mono auto generated files
