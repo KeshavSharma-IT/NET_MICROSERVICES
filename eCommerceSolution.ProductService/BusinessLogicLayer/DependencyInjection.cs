@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BusinessLogicLayer.Mappers;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,11 @@ namespace BusinessLogicLayer
         {
 
             // Add data access Layer services into the ioc container
+
+            services.AddAutoMapper(typeof(ProductAddPequestToProductMappingProfile).Assembly);  
+            // as we are refering entire assembly  we dont need to register all mapper one will enough for all
+
+
             return services;
         }
     }

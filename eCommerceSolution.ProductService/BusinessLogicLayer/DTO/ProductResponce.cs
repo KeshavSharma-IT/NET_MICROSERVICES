@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BusinessLogicLayer.DTO
 {
-    public record ProductResponce(Guid ProductId, string ProductName, CategoryOptions Category, double? UnitPrice, int? QuentityInStock)
+    public record ProductResponce(Guid ProductID, string ProductName, CategoryOptions Category, double? UnitPrice, int? QuantityInStock)
     {
         public ProductResponce() : this(default, default, default, default, default) { }
 
