@@ -1,6 +1,7 @@
-using BusinessLogicLayer;
-using DataAccessLayer;
-using ProductMicroService.Api.Middleware;
+using eCommerce.BusinessLogicLayer;
+using eCommerce.DataAccessLayer;
+using eCommerce.ProductMicroService.Api.ApiEndPoints;
+using eCommerce.ProductMicroService.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,5 +25,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapProductApiEndPoints();
 
 app.Run();
+

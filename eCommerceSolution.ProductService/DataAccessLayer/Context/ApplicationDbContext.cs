@@ -1,8 +1,8 @@
-﻿using DataAccessLayer.Entities;
+﻿using eCommerce.DataAccessLayer.Entities;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace DataAccessLayer.Context
+namespace eCommerce.DataAccessLayer.Context
 {
     public class ApplicationDbContext:DbContext
     {

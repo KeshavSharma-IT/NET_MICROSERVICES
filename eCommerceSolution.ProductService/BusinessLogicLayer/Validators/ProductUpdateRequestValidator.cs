@@ -1,10 +1,10 @@
-﻿using BusinessLogicLayer.DTO;
+﻿using eCommerce.BusinessLogicLayer.DTO;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BusinessLogicLayer.Validators
+namespace eCommerce.BusinessLogicLayer.Validators
 {
     
 
@@ -13,7 +13,7 @@ namespace BusinessLogicLayer.Validators
         public ProductUpdateRequestValidator()
         {
             //productID
-            RuleFor(temp => temp.ProductId)
+            RuleFor(temp => temp.ProductID)
                 .NotEmpty()
                 .WithMessage("ProductId can't be blank");
             //productName

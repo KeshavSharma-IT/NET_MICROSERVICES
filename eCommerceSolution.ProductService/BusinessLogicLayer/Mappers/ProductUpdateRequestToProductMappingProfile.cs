@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using BusinessLogicLayer.DTO;
-using DataAccessLayer.Entities;
+using eCommerce.BusinessLogicLayer.DTO;
+using eCommerce.DataAccessLayer.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BusinessLogicLayer.Mappers
+namespace eCommerce.BusinessLogicLayer.Mappers
 {
     public class ProductUpdateRequestToProductMappingProfile   :Profile
     {

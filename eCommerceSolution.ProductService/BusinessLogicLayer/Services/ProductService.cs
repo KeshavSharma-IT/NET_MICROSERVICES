@@ -1,16 +1,17 @@
 ﻿using AutoMapper;
-using BusinessLogicLayer.DTO;
-using BusinessLogicLayer.IServices;
-using DataAccessLayer.Entities;
-using DataAccessLayer.IRepository;
+using eCommerce.BusinessLogicLayer.DTO;
+using eCommerce.BusinessLogicLayer.IServices;
+using eCommerce.DataAccessLayer.Entities;
+using eCommerce.DataAccessLayer.IRepository;
 using FluentValidation;
 using FluentValidation.Results;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using static Mysqlx.Expect.Open.Types;
 
-namespace BusinessLogicLayer.Services
+namespace eCommerce.BusinessLogicLayer.Services
 {
     public class ProductService : IProductServices
     {
@@ -38,7 +39,7 @@ namespace BusinessLogicLayer.Services
 
             //validate
             ValidationResult validation = await _productAddRequestValidator.ValidateAsync(request);
-            if (validation.IsValid) {
+            if (!validation.IsValid) {
                string errors= string.Join(", ", validation.Errors.Select(temp => temp.ErrorMessage));
                 throw new ArgumentException(errors);
             }
@@ -62,27 +63,68 @@ namespace BusinessLogicLayer.Services
 
         public async Task<bool> DeleteProduct(Guid id)
         {
-            throw new NotImplementedException();
+            Product? exitingProduct= await _productRepository.GetProductByCondition(temp => temp.ProductID==id);
+            if(exitingProduct==null) return false;
+
+            //attempt to delete
+            bool isdeleted= await _productRepository.DeleteProduct(id);
+            return isdeleted;
         }
 
         public async Task<ProductResponce?> GetProductByCondition(Expression<Func<Product, bool>> condition)
         {
-            throw new NotImplementedException();
+            Product? product= await _productRepository.GetProductByCondition(condition);
+            if(product==null) return null;
+
+            ProductResponce productResponce = _mapper.Map<ProductResponce>(product);
+            return productResponce;
         }
 
         public async Task<List<ProductResponce?>> GetProductByConditions(Expression<Func<Product, bool>> condition)
         {
-            throw new NotImplementedException();
+            IEnumerable<Product?> products = await _productRepository.GetProductsByConditions(condition);
+            if (products == null) return null;
+
+            IEnumerable<ProductResponce> productResponce = _mapper.Map<IEnumerable<ProductResponce>>(products);
+            return productResponce.ToList();
         }
 
         public async Task<List<ProductResponce>> GetProducts()
         {
-            throw new NotImplementedException();
+            IEnumerable<Product?> products = await _productRepository.GetProducts();
+            if (products == null) return null;
+
+            IEnumerable<ProductResponce> productResponce = _mapper.Map<IEnumerable<ProductResponce>>(products);
+            return productResponce.ToList();
         }
 
         public async Task<ProductResponce?> UpdateProduct(ProductUpdateRequest request)
         {
-            throw new NotImplementedException();
+            Product? exitingProduct = await _productRepository.GetProductByCondition(temp => temp.ProductID == request.ProductID);
+
+            if (exitingProduct == null) throw new ArgumentException("Invalid Product Id");
+
+
+            // validators 
+
+            ValidationResult validationResult = await _productUpdateRequestValidator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                string errors = string.Join(", ", validationResult.Errors.Select(temp => temp.ErrorMessage));
+                throw new ArgumentException(errors);
+            }
+
+            //map data to ProductUpdateRequest to product
+
+            Product productInput = _mapper.Map<Product>(request);
+
+            Product? Updatedproduct= await _productRepository.UpdateProduct(productInput);
+
+            ProductResponce UpdatedproductMap = _mapper.Map<ProductResponce>(Updatedproduct);
+
+            return UpdatedproductMap;        
+
         }
     }
 }

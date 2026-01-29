@@ -1,10 +1,10 @@
-﻿using BusinessLogicLayer.Mappers;
+﻿using eCommerce.BusinessLogicLayer.Mappers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BusinessLogicLayer
+namespace eCommerce.BusinessLogicLayer
 {
     public static class DependencyInjection
     {

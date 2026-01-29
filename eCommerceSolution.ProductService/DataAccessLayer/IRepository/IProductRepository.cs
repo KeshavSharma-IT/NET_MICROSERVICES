@@ -1,9 +1,9 @@
 ﻿
 
-using DataAccessLayer.Entities;
+using eCommerce.DataAccessLayer.Entities;
 using System.Linq.Expressions;
 
-namespace DataAccessLayer.IRepository
+namespace eCommerce.DataAccessLayer.IRepository
 {
     public interface IProductRepository
     {

@@ -1,11 +1,11 @@
-﻿using BusinessLogicLayer.DTO;
-using DataAccessLayer.Entities;
+﻿using eCommerce.BusinessLogicLayer.DTO;
+using eCommerce.DataAccessLayer.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace BusinessLogicLayer.IServices
+namespace eCommerce.BusinessLogicLayer.IServices
 {
     public interface IProductServices
     {

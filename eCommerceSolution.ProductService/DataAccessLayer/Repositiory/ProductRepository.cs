@@ -1,13 +1,13 @@
-﻿using DataAccessLayer.Context;
-using DataAccessLayer.Entities;
-using DataAccessLayer.IRepository;
+﻿using eCommerce.DataAccessLayer.Context;
+using eCommerce.DataAccessLayer.Entities;
+using eCommerce.DataAccessLayer.IRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace DataAccessLayer.Repositiory
+namespace eCommerce.DataAccessLayer.Repositiory
 {
     public class ProductRepository : IProductRepository
     {

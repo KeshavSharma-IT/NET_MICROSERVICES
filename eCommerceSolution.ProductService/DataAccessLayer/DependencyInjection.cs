@@ -1,12 +1,12 @@
 ﻿
-using DataAccessLayer.Context;
-using DataAccessLayer.IRepository;
-using DataAccessLayer.Repositiory;
+using eCommerce.DataAccessLayer.Context;
+using eCommerce.DataAccessLayer.IRepository;
+using eCommerce.DataAccessLayer.Repositiory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DataAccessLayer
+namespace eCommerce.DataAccessLayer
 {
     public static class DependencyInjection
     {
