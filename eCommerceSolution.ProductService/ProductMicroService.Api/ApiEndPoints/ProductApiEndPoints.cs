@@ -1,5 +1,6 @@
 ﻿using eCommerce.BusinessLogicLayer.DTO;
 using eCommerce.BusinessLogicLayer.IServices;
+using eCommerce.BusinessLogicLayer.Services;
 using FluentValidation;
 using FluentValidation.Results;
 
@@ -11,8 +12,6 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
         {
 
             //Get   api/products
-
-
             app.MapGet("/api/products", async (IProductServices productServices) =>
             {
                List<ProductResponce> productResponces= await productServices.GetProducts();
@@ -33,8 +32,16 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
             //Get   api/products/search/name or cateogory
             app.MapGet("/api/products/search/{searchString}", async (IProductServices productServices, string searchString) =>
             {
-                List<ProductResponce> productsByProductName = await productServices.GetProductByConditions(temp => temp.ProductName!=null && temp.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase));
-                List<ProductResponce> productsByCategory = await productServices.GetProductByConditions(temp => temp.Category!=null && temp.Category.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+                // Normalize to lower-case so EF Core can translate to SQL LOWER(...) and avoid unsupported StringComparison overloads
+                string searchLower = searchString?.ToLowerInvariant() ?? string.Empty;
+
+                List<ProductResponce?> productsByProductName = await productServices.GetProductByConditions(
+                    temp => temp.ProductName != null && temp.ProductName.ToLower().Contains(searchLower)
+                );
+
+                List<ProductResponce?> productsByCategory = await productServices.GetProductByConditions(
+                    temp => temp.Category != null && temp.Category.ToLower().Contains(searchLower)
+                );
 
                 var products = productsByProductName.Union(productsByCategory);
                 return Results.Ok(products);
@@ -59,7 +66,7 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
                     return Results.ValidationProblem(errors);
                 }
 
-             var addedProductResponce=   await productServices.AddProduct(productAddRequest);
+                  var addedProductResponce=   await productServices.AddProduct(productAddRequest);
                 if (addedProductResponce != null)
                 {
                     return Results.Created($"/api/products/search/productId/{addedProductResponce.ProductID}", addedProductResponce);

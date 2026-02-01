@@ -7,9 +7,9 @@ using System.Text;
 
 namespace eCommerce.BusinessLogicLayer.Mappers
 {
-    internal class ProductTpProductResponseMappingProfile :Profile
+    internal class ProductToProductResponseMappingProfile :Profile
     {
-        public ProductTpProductResponseMappingProfile()
+        public ProductToProductResponseMappingProfile()
         {
             //source type- product and destination type is ProductResponce
             CreateMap<Product, ProductResponce>()

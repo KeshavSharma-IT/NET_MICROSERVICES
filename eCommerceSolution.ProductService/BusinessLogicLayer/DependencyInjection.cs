@@ -1,4 +1,8 @@
-﻿using eCommerce.BusinessLogicLayer.Mappers;
+﻿using eCommerce.BusinessLogicLayer.IServices;
+using eCommerce.BusinessLogicLayer.Mappers;
+using eCommerce.BusinessLogicLayer.Services;
+using eCommerce.BusinessLogicLayer.Validators;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -17,6 +21,9 @@ namespace eCommerce.BusinessLogicLayer
             // as we are refering entire assembly  we dont need to register all mapper one will enough for all
 
 
+            services.AddScoped<IProductServices,ProductService>();
+
+            services.AddValidatorsFromAssemblyContaining<ProductAddRequestValidator>();  //REGISTER VALIDATORS ONLY 1 REGESTER WILL WORK FOR ALL
             return services;
         }
     }

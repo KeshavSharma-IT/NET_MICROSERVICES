@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using eCommerce.BusinessLogicLayer.DTO;
 using eCommerce.BusinessLogicLayer.IServices;
+using eCommerce.BusinessLogicLayer.Mappers;
 using eCommerce.DataAccessLayer.Entities;
 using eCommerce.DataAccessLayer.IRepository;
 using FluentValidation;
@@ -94,7 +95,8 @@ namespace eCommerce.BusinessLogicLayer.Services
             IEnumerable<Product?> products = await _productRepository.GetProducts();
             if (products == null) return null;
 
-            IEnumerable<ProductResponce> productResponce = _mapper.Map<IEnumerable<ProductResponce>>(products);
+            IEnumerable<ProductResponce?> productResponce = _mapper.Map<IEnumerable<ProductResponce>>(products);
+          
             return productResponce.ToList();
         }
 
