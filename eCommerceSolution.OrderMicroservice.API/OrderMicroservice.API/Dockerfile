@@ -4,29 +4,27 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 9090
-EXPOSE 9091
+EXPOSE 8080
+EXPOSE 8081
 
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Ecommerce.Api/Ecommerce.Api.csproj", "Ecommerce.Api/"]
-RUN dotnet restore "./Ecommerce.Api/Ecommerce.Api.csproj"
+COPY ["OrderMicroservice.API/OrderMicroservice.API.csproj", "OrderMicroservice.API/"]
+RUN dotnet restore "./OrderMicroservice.API/OrderMicroservice.API.csproj"
 COPY . .
-WORKDIR "/src/Ecommerce.Api"
-RUN dotnet build "./Ecommerce.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/OrderMicroservice.API"
+RUN dotnet build "./OrderMicroservice.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Ecommerce.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./OrderMicroservice.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV POSTGRES_HOST=localhost
-ENV POSTGRES_PASSWORD=admin
-ENTRYPOINT ["dotnet", "Ecommerce.Api.dll"]
+ENTRYPOINT ["dotnet", "OrderMicroservice.API.dll"]
