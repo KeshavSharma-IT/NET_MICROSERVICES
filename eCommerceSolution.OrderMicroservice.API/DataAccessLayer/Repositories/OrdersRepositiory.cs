@@ -2,39 +2,70 @@
 using eCommerce.OrderMicroservice.DataAccessLayer.Entities;
 using eCommerce.OrderMicroservice.DataAccessLayer.ReposittoryContracts;
 using MongoDB.Driver;
+using static System.Net.WebRequestMethods;
 
 namespace eCommerce.OrderMicroservice.DataAccessLayer.Repositories
 {
     public class OrdersRepositiory : IOrdersRepository
     {
-        Task<Order?> IOrdersRepository.AddOrder(Order order)
+        private readonly IMongoCollection<Order> _orders;
+
+        private readonly string collectionName = "orders";
+
+        public OrdersRepositiory(IMongoDatabase mongoDatabase)
         {
-            throw new NotImplementedException();
+            _orders = mongoDatabase.GetCollection<Order>(collectionName);
+        }
+        public async Task<Order?> AddOrder(Order order)
+        {
+            order.OrderID=Guid.NewGuid();
+
+            await _orders.InsertOneAsync(order);
+            return order;
         }
 
-        Task<bool> IOrdersRepository.DeleteOrder(Guid orderId)
+        public async Task<bool> DeleteOrder(Guid orderId)
         {
-            throw new NotImplementedException();
+         FilterDefinition<Order> filter = Builders<Order>.Filter.Eq(temp=>temp.OrderID,orderId);
+           Order? exitingOrder= (await _orders.FindAsync(filter)).FirstOrDefault();
+            if (exitingOrder != null) {                  
+                return false;
+            }
+            DeleteResult deleteResult= await _orders.DeleteOneAsync(filter);
+
+            return deleteResult.DeletedCount > 0;
+
         }
 
-        Task<Order?> IOrdersRepository.GetOrderByConditions(FilterDefinition<Order> filter)
+        public async Task<Order?> GetOrderByConditions(FilterDefinition<Order> filter)
         {
-            throw new NotImplementedException();
+                   return (await _orders.FindAsync(filter)).FirstOrDefault();
         }
 
-        Task<IEnumerable<Order>> IOrdersRepository.GetOrders()
+        public async Task<IEnumerable<Order>> GetOrders()
         {
-            throw new NotImplementedException();
+            return (await _orders.FindAsync(Builders<Order>.Filter.Empty)).ToList();
         }
 
-        Task<IEnumerable<Order>> IOrdersRepository.GetOrdersByConditions(FilterDefinition<Order> filter)
+        public async Task<IEnumerable<Order>> GetOrdersByConditions(FilterDefinition<Order> filter)
         {
-            throw new NotImplementedException();
+            return (await _orders.FindAsync(filter)).ToList();
         }
 
-        Task<Order?> IOrdersRepository.UpdateOrder(Order order)
+        public async Task<Order?> UpdateOrder(Order order)
         {
-            throw new NotImplementedException();
+            FilterDefinition<Order> filter = Builders<Order>.Filter.Eq(temp => temp.OrderID, order.OrderID);
+            Order? exitingOrder = (await _orders.FindAsync(filter)).FirstOrDefault();
+            if (exitingOrder != null)
+            {
+                return null;
+            }
+
+             ReplaceOneResult replaceOne= await _orders.ReplaceOneAsync(filter, order);
+
+            return order;
+
+
         }
     }
 }

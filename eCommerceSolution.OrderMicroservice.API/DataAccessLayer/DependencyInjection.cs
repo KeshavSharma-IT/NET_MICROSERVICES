@@ -1,5 +1,7 @@
 ﻿
 
+using eCommerce.OrderMicroservice.DataAccessLayer.Repositories;
+using eCommerce.OrderMicroservice.DataAccessLayer.ReposittoryContracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -23,7 +25,7 @@ namespace eCommerce.OrderMicroservice.DataAccessLayer
                 return client.GetDatabase("OrdersDatabase");
             });
 
-
+            services.AddScoped<IOrdersRepository, OrdersRepositiory>();
 
 
             return services;
