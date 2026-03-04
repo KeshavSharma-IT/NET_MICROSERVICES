@@ -1,6 +1,4 @@
-﻿
-
-using eCommerce.OrderMicroservice.DataAccessLayer.Repositories;
+﻿using eCommerce.OrderMicroservice.DataAccessLayer.Repositories;
 using eCommerce.OrderMicroservice.DataAccessLayer.ReposittoryContracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

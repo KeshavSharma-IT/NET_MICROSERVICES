@@ -16,7 +16,7 @@ namespace OrderMicroservice.API.Middleware
         {
             try
             {
-                _requestDelegate(httpContext);
+              await  _requestDelegate(httpContext);
             }
             catch (Exception ex) {
 

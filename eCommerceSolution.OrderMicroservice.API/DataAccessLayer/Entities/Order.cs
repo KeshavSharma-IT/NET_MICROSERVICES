@@ -9,7 +9,7 @@ namespace eCommerce.OrderMicroservice.DataAccessLayer.Entities
     {
         [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.String)]
-        public int _id { get; set; }
+        public Guid _id { get; set; }
 
         [BsonRepresentation(MongoDB.Bson.BsonType.String)]
         public Guid OrderID { get; set; }
