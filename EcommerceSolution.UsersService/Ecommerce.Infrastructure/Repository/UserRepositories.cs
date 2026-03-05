@@ -39,8 +39,8 @@ namespace Ecommerce.Infrastructure.Repository
             //sql query to select a user  by email id and password
             string query = "SELECT * FROM public.\"Users\" Where \"Email\"=@Email AND \"Password\"=@Password";
 
-    //        var user = await _dbContext.DbConnection
-    //.QueryFirstOrDefaultAsync<ApplicationUser>(query, new { Email = email, Password = password });
+            //        var user = await _dbContext.DbConnection
+            //.QueryFirstOrDefaultAsync<ApplicationUser>(query, new { Email = email, Password = password });
             var parameters = new { Email=email,Password = password};
            ApplicationUser? user =await _dbContext.DbConnection.QueryFirstOrDefaultAsync<ApplicationUser>(query, parameters);
 
@@ -54,6 +54,17 @@ namespace Ecommerce.Infrastructure.Repository
             //    Gender=GenderOptions.Male.ToString(),
 
             //};
+        }
+
+        public async Task<ApplicationUser?> GetUserByUserID(Guid userID)
+        {
+            string query = "SELECT * FROM public.\"Users\" Where \"UserID\"=@UserID";
+            var parameters = new {UserID=userID};
+
+            
+            ApplicationUser? user = await _dbContext.DbConnection.QueryFirstOrDefaultAsync<ApplicationUser>(query, parameters);
+
+            return user;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using eCommerce.OrderMicroservice.BusinessLogicLayer.DTO;
+using eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients;
 using eCommerce.OrderMicroservice.BusinessLogicLayer.IServicesContracts;
 using eCommerce.OrderMicroservice.DataAccessLayer.Entities;
 using eCommerce.OrderMicroservice.DataAccessLayer.ReposittoryContracts;
@@ -22,9 +23,10 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
         private readonly IValidator<OrderItemAddRequest> _orderItemValidator;
         private readonly IValidator<OrderUpdateRequest> _orderUpdateValidator;
         private readonly IValidator<OrderItemUpdateRequest> _orderItemUpdateValidator;
+        private readonly UserMicroserviceClient _userMicroserviceClient;
         
 
-        public OrdersService(IOrdersRepository ordersRepository, IMapper mapper,IValidator<OrderAddRequest> addValidator,IValidator<OrderItemAddRequest> orderItemValidator, IValidator<OrderUpdateRequest> orderUpdateValidator,IValidator<OrderItemUpdateRequest> orderItemUpdateValidator)
+        public OrdersService(IOrdersRepository ordersRepository, IMapper mapper,IValidator<OrderAddRequest> addValidator,IValidator<OrderItemAddRequest> orderItemValidator, IValidator<OrderUpdateRequest> orderUpdateValidator,IValidator<OrderItemUpdateRequest> orderItemUpdateValidator, UserMicroserviceClient userMicroserviceClient)
         {
            _mapper = mapper;
             _ordersRepository = ordersRepository;
@@ -32,6 +34,7 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
             _orderUpdateValidator = orderUpdateValidator;
             _orderItemUpdateValidator= orderItemUpdateValidator;
             _orderItemValidator = orderItemValidator;
+            _userMicroserviceClient = userMicroserviceClient;
         }
 
         public async Task<OrderResponse?> AddOrder(OrderAddRequest orderAddRequest)
@@ -62,7 +65,13 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
             }
 
             //but  as this service is all about order or it will have no data about user id
-            //but we need to check user id as it is a part of order entity
+            //but we need to check user id as it is a part of order entity  so we need to validate
+
+           UserDTO? user= await _userMicroserviceClient.GetUserByUserID(orderAddRequest.UserID);
+            if (user == null) {
+                
+                throw new ArgumentNullException("Invalid User ID");
+            }
 
 
 
@@ -157,6 +166,14 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                 throw new ArgumentException(errors);
             }
 
+
+            // checking user ID is valid or not
+            UserDTO user = await _userMicroserviceClient.GetUserByUserID(orderUpdateRequest.UserID);
+            if (user == null)
+            {
+
+                throw new ArgumentNullException("Invalid User ID");
+            }
 
             // above validator is not checking orderItesm so we are using another validator
             foreach (OrderItemUpdateRequest orderItemUpdateRequest in orderUpdateRequest.OrderItems)

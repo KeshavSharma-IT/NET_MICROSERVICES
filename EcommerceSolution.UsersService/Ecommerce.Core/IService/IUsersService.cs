@@ -9,5 +9,7 @@ namespace Ecommerce.Core.IService
     {
         Task<AuthenticationResponse?>  Login(LoginRequest request);
         Task<AuthenticationResponse?>  Register(RegisterRequest request);
+
+        Task<UserDTO> GetUserByUserID(Guid UserID);
     }
 }
