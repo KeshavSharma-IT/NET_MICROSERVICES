@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace eCommerce.OrderMicroservice.BusinessLogicLayer.DTO
 {
     public record UserDTO(Guid UserID, string? Email, string? PersonName, string Gender);
