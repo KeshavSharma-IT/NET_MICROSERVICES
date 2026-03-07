@@ -3,6 +3,7 @@ using eCommerce.BusinessLogicLayer.IServices;
 using eCommerce.BusinessLogicLayer.Services;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace eCommerce.ProductMicroService.Api.ApiEndPoints
 {
@@ -25,6 +26,9 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
             {
                 ProductResponce? productResponces = await productServices.GetProductByCondition(temp=>temp.ProductID == ProductID);
 
+                if (productResponces == null) {
+                    return Results.NotFound();
+                }
                 return Results.Ok(productResponces);
 
             });

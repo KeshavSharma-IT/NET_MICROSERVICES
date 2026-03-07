@@ -24,9 +24,10 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
         private readonly IValidator<OrderUpdateRequest> _orderUpdateValidator;
         private readonly IValidator<OrderItemUpdateRequest> _orderItemUpdateValidator;
         private readonly UserMicroserviceClient _userMicroserviceClient;
+        private readonly ProductsMicroserviceClient _productsMicroserviceClient;
         
 
-        public OrdersService(IOrdersRepository ordersRepository, IMapper mapper,IValidator<OrderAddRequest> addValidator,IValidator<OrderItemAddRequest> orderItemValidator, IValidator<OrderUpdateRequest> orderUpdateValidator,IValidator<OrderItemUpdateRequest> orderItemUpdateValidator, UserMicroserviceClient userMicroserviceClient)
+        public OrdersService(IOrdersRepository ordersRepository, IMapper mapper,IValidator<OrderAddRequest> addValidator,IValidator<OrderItemAddRequest> orderItemValidator, IValidator<OrderUpdateRequest> orderUpdateValidator,IValidator<OrderItemUpdateRequest> orderItemUpdateValidator, UserMicroserviceClient userMicroserviceClient, ProductsMicroserviceClient productsMicroserviceClient)
         {
            _mapper = mapper;
             _ordersRepository = ordersRepository;
@@ -35,6 +36,7 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
             _orderItemUpdateValidator= orderItemUpdateValidator;
             _orderItemValidator = orderItemValidator;
             _userMicroserviceClient = userMicroserviceClient;
+            _productsMicroserviceClient= productsMicroserviceClient;
         }
 
         public async Task<OrderResponse?> AddOrder(OrderAddRequest orderAddRequest)
@@ -62,17 +64,26 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                     throw new ArgumentException(errors);
 
                 }
+
+                // check productID exists in produts microservices 
+
+                ProductDTO? product= await   _productsMicroserviceClient.GetProductByProductID(orderItemAddRequest.ProductID);
+                if(product == null)
+                {
+                    throw new ArgumentNullException("Invalid Product ID");
+                }
             }
 
             //but  as this service is all about order or it will have no data about user id
             //but we need to check user id as it is a part of order entity  so we need to validate
 
-           UserDTO? user= await _userMicroserviceClient.GetUserByUserID(orderAddRequest.UserID);
+            UserDTO? user= await _userMicroserviceClient.GetUserByUserID(orderAddRequest.UserID);
             if (user == null) {
                 
                 throw new ArgumentNullException("Invalid User ID");
             }
 
+            //
 
 
             //now using mapper to convert        OrderAddRequest to order
@@ -167,13 +178,6 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
             }
 
 
-            // checking user ID is valid or not
-            UserDTO user = await _userMicroserviceClient.GetUserByUserID(orderUpdateRequest.UserID);
-            if (user == null)
-            {
-
-                throw new ArgumentNullException("Invalid User ID");
-            }
 
             // above validator is not checking orderItesm so we are using another validator
             foreach (OrderItemUpdateRequest orderItemUpdateRequest in orderUpdateRequest.OrderItems)
@@ -185,12 +189,26 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                     throw new ArgumentException(errors);
 
                 }
+                // check productID exists in produts microservices 
+
+                ProductDTO? product = await _productsMicroserviceClient.GetProductByProductID(orderItemUpdateRequest.ProductID);
+                if (product == null)
+                {
+                    throw new ArgumentNullException("Invalid Product ID");
+                }
             }
 
             //but  as this service is all about order or it will have no data about user id
             //but we need to check user id as it is a part of order entity
 
 
+            // checking user ID is valid or not
+            UserDTO user = await _userMicroserviceClient.GetUserByUserID(orderUpdateRequest.UserID);
+            if (user == null)
+            {
+
+                throw new ArgumentNullException("Invalid User ID");
+            }
 
             //now using mapper to convert OrderUpdateRequest to order
             Order orderinput = _mapper.Map<Order>(orderUpdateRequest);
