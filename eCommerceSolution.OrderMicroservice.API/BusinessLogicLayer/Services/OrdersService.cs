@@ -127,6 +127,14 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                 }
             }
 
+            if (addedOrderResponse != null)
+            {
+                if (user != null)
+                {
+                    _mapper.Map<UserDTO, OrderResponse>(user,addedOrderResponse);
+                }
+            }
+
 
 
             return addedOrderResponse;
@@ -172,6 +180,16 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                         continue;
                     }
                     _mapper.Map<ProductDTO, OrderItemResponse>(product, orderItemResponse);
+                }                 
+            }
+
+            //TO DO: Load UserPersonName and Email from Users Microservice
+            if (orderResponse != null)
+            {
+                UserDTO? user = await _userMicroserviceClient.GetUserByUserID(orderResponse.UserID);
+                if (user != null)
+                {
+                    _mapper.Map<UserDTO, OrderResponse>(user, orderResponse);
                 }
             }
 
@@ -203,20 +221,55 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                     }
                         _mapper.Map<ProductDTO,OrderItemResponse>(product, orderItemResponse);
                 }
+                   
+                //loading UserPersonName and Email from user microswrvices
+                UserDTO? userDTO= await _userMicroserviceClient.GetUserByUserID(orderResponse.UserID);
+                    if (userDTO != null) {
+                        _mapper.Map<UserDTO, OrderResponse>(userDTO, orderResponse);
+                    }
+
             }
+
 
             return orderResponses.ToList();
         }
 
         public async Task<List<OrderResponse?>> GetOrdersByCondition(FilterDefinition<Order> filter)
         {
-           IEnumerable<Order?> order = await _ordersRepository.GetOrdersByConditions(filter);
-            if (order == null)
+            IEnumerable<Order?> orders = await _ordersRepository.GetOrdersByConditions(filter);
+
+
+            IEnumerable<OrderResponse?> orderResponses = _mapper.Map<IEnumerable<OrderResponse>>(orders);
+
+
+            //TO DO: Load ProductName and Category in each OrderItem
+            foreach (OrderResponse? orderResponse in orderResponses)
             {
-                return null;
+                if (orderResponse == null)
+                {
+                    continue;
+                }
+
+                foreach (OrderItemResponse orderItemResponse in orderResponse.OrderItems)
+                {
+                    ProductDTO? productDTO = await _productsMicroserviceClient.GetProductByProductID(orderItemResponse.ProductID);
+
+                    if (productDTO == null)
+                        continue;
+
+                    _mapper.Map<ProductDTO, OrderItemResponse>(productDTO, orderItemResponse);
+                }
+
+
+                //TO DO: Load UserPersonName and Email from Users Microservice
+                UserDTO? user = await _userMicroserviceClient.GetUserByUserID(orderResponse.UserID);
+                if (user != null) 
+                {
+                    _mapper.Map<UserDTO, OrderResponse>(user, orderResponse);
+                }
             }
-            IEnumerable<OrderResponse?> orderResponse = _mapper.Map<IEnumerable<OrderResponse>>(order);
-            return orderResponse.ToList();
+
+            return orderResponses.ToList();
         }
 
         public async Task<OrderResponse?> UpdateOrder(OrderUpdateRequest orderUpdateRequest)
@@ -305,6 +358,13 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Services
                 }
             }
 
+            if (updatedOrderResponse != null)
+            {
+                if (user != null)
+                {
+                    _mapper.Map<UserDTO, OrderResponse>(user, updatedOrderResponse);
+                }
+            }
 
             return updatedOrderResponse;
         }
