@@ -14,60 +14,19 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Policies
     public class UserMicroservicesPolicies : IUserMicroServicePolicies
     {
         private readonly ILogger<UserMicroservicesPolicies> _logger;
+        private readonly IPollyPolicies _pollyPolicies;
 
-        public UserMicroservicesPolicies(ILogger<UserMicroservicesPolicies> logger)
+        public UserMicroservicesPolicies(ILogger<UserMicroservicesPolicies> logger, IPollyPolicies pollyPolicies)
         {
              _logger = logger;
-        }
-
-
-        public IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
-        {
-            AsyncRetryPolicy<HttpResponseMessage> policy=
-            Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
-               .WaitAndRetryAsync(retryCount: 5,  //number of time retry
-               //sleepDurationProvider: retryAttermp => TimeSpan.FromSeconds(2),  sending requestion ever 2 second now 
-               sleepDurationProvider: retryAttermp => TimeSpan.FromSeconds(Math.Pow(2,retryAttermp)), // increaing retry time
-               onRetry: (outcome, timespan, retryAttempt, context) =>
-               {
-                   _logger.LogInformation($"Retry {retryAttempt} after {timespan.TotalSeconds}");
-               });
-
-            return policy;
-        }
-        public IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
-        {
-            AsyncCircuitBreakerPolicy<HttpResponseMessage> policy =
-           Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
-           .CircuitBreakerAsync(handledEventsAllowedBeforeBreaking: 3, // no of retry
-           durationOfBreak: TimeSpan.FromMinutes(2),         // delay between
-           onBreak: (outcome, timespan) =>
-               {
-                   _logger.LogInformation($"Circuit Breaker open for {timespan.TotalSeconds} due to consecuitivr 3 failure. The subsequent request will be blocked");
-               }
-               ,
-            onReset: ()=>{
-                _logger.LogInformation($"Circuit Breaker closed. The subsequent request will be allowed");
-            }
-           );                                
-
-
-
-            return policy;
-        }
-
-        public IAsyncPolicy<HttpResponseMessage> GetTimeoutPolicy()
-        {
-           AsyncTimeoutPolicy<HttpResponseMessage> policy= Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(1500));
-            return policy;
-
+            _pollyPolicies = pollyPolicies;
         }
 
         public IAsyncPolicy<HttpResponseMessage> GetCombinedPolicy()
         {
-            var retryPolicy = GetRetryPolicy();
-            var circuitBreakerPolicy = GetCircuitBreakerPolicy();
-            var timeoutPolicy = GetTimeoutPolicy();
+            var retryPolicy = _pollyPolicies.GetRetryPolicy(5);
+            var circuitBreakerPolicy = _pollyPolicies.GetCircuitBreakerPolicy(3,TimeSpan.FromMinutes(2));
+            var timeoutPolicy = _pollyPolicies.GetTimeoutPolicy(TimeSpan.FromMinutes(2));
 
             AsyncPolicyWrap<HttpResponseMessage> wrappedPolicy = Policy.WrapAsync(retryPolicy, circuitBreakerPolicy, timeoutPolicy);
             return wrappedPolicy;

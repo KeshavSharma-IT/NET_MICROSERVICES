@@ -30,6 +30,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddTransient<IUserMicroServicePolicies, UserMicroservicesPolicies>();
 builder.Services.AddTransient<IProductsMicroservicePolicies, ProductsMicroservicePolicies>();
+builder.Services.AddTransient<IPollyPolicies, PollyPolicies>();
 
 builder.Services.AddHttpClient<UserMicroserviceClient>(client =>
 {

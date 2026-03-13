@@ -24,15 +24,16 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
             //Get   api/products/search/productId/12
             app.MapGet("/api/products/search/productId/{ProductID:Guid}", async (IProductServices productServices,Guid ProductID) =>
             {
-                await Task.Delay(100);
-                throw new NotImplementedException();
+                //await Task.Delay(100);
+                //throw new NotImplementedException();
 
-                //ProductResponce? productResponces = await productServices.GetProductByCondition(temp=>temp.ProductID == ProductID);
+                ProductResponce? productResponces = await productServices.GetProductByCondition(temp => temp.ProductID == ProductID);
 
-                //if (productResponces == null) {
-                //    return Results.NotFound();
-                //}
-                //return Results.Ok(productResponces);
+                if (productResponces == null)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(productResponces);
 
             });
 

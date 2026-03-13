@@ -41,7 +41,7 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.Policies
                    _logger.LogInformation("FallBack triggered: The request failed, returning dummy data");
                    ProductDTO product = new ProductDTO(ProductID: Guid.Empty, ProductName: "Temproraily Unavailable (fallback)", UnitPrice: 0, QuantityInStock: 0, Category: "Temproraily Unavailable (fallback)");
 
-                       var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                       var response = new HttpResponseMessage(System.Net.HttpStatusCode.ServiceUnavailable)
                        {
                            Content = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json")
                        };

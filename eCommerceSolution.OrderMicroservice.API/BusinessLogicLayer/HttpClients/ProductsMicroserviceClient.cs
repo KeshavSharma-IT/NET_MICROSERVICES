@@ -1,8 +1,10 @@
 ﻿
 using eCommerce.OrderMicroservice.BusinessLogicLayer.DTO;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Polly.Bulkhead;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 {
@@ -10,11 +12,13 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ProductsMicroserviceClient> _logger;
+        private readonly IDistributedCache _distributedCache;
 
-        public ProductsMicroserviceClient(HttpClient httpClient, ILogger<ProductsMicroserviceClient> logger)
+        public ProductsMicroserviceClient(HttpClient httpClient, ILogger<ProductsMicroserviceClient> logger, IDistributedCache distributedCache)
         {
              _httpClient = httpClient;
             _logger = logger;
+            _distributedCache = distributedCache;
         }
 
         public async Task<ProductDTO?> GetProductByProductID(Guid productID)
@@ -27,9 +31,33 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync($"/api/products/search/product-id/{productID}");
+                //using cache before hitting api
+                string cacheKey = $"product:{productID}";
+                string? cachedProduct= await _distributedCache.GetStringAsync(cacheKey) ;
+
+                if (cachedProduct!=null)
+                {
+                    ProductDTO? cachedproduct=  JsonSerializer.Deserialize<ProductDTO>(cachedProduct);
+                    return cachedproduct;
+                }
+
+                // if data not found hitting api
+
+                HttpResponseMessage response = await _httpClient.GetAsync($"/api/products/search/productId/{productID}");
                 if (!response.IsSuccessStatusCode)
                 {
+                    if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                    {
+                        ProductDTO? productFromFallBack = await response.Content.ReadFromJsonAsync<ProductDTO?>();
+
+                        if (productFromFallBack == null)
+                        {
+
+                            throw new NotImplementedException("fallBack policy was not implemented");
+                        }
+                        return productFromFallBack;
+                    }
+
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
                         return null;
@@ -51,6 +79,16 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
                     throw new ArgumentException("Invalid product ID");
                 }
+
+                // adding product in cache
+                string productJson= JsonSerializer.Serialize(product);
+
+               DistributedCacheEntryOptions options= new DistributedCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
+                    .SetSlidingExpiration(TimeSpan.FromSeconds(100));
+
+                string cacheKeyToWrite = $"product:{productID}";
+                await _distributedCache.SetStringAsync(cacheKeyToWrite, productJson,options);
 
                 return product;
             }
