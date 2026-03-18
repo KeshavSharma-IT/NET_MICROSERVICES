@@ -23,7 +23,7 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
         public async Task<ProductDTO?> GetProductByProductID(Guid productID)
         {
-            //HttpResponseMessage responseMessage= await _httpClient.GetAsync($"/api/products/search/productId/{productID}");
+            //HttpResponseMessage responseMessage= await _httpClient.GetAsync($"/gateway/products/search/productId/{productID}");
             //if (!responseMessage.IsSuccessStatusCode)
             //{
             //    return null;
@@ -43,7 +43,7 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
                 // if data not found hitting api
 
-                HttpResponseMessage response = await _httpClient.GetAsync($"/api/products/search/productId/{productID}");
+                HttpResponseMessage response = await _httpClient.GetAsync($"/gateway/products/search/productId/{productID}");
                 if (!response.IsSuccessStatusCode)
                 {
                     if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
@@ -58,7 +58,8 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
                         return productFromFallBack;
                     }
 
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
                         return null;
                     }
@@ -76,7 +77,6 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
                 if (product == null)
                 {
-
                     throw new ArgumentException("Invalid product ID");
                 }
 

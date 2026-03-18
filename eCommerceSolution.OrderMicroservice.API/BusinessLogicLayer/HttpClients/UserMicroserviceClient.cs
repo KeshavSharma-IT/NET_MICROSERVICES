@@ -1,21 +1,25 @@
 ﻿
 using eCommerce.OrderMicroservice.BusinessLogicLayer.DTO;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 {
     public class UserMicroserviceClient
     {
         private readonly HttpClient _httpClient;
+        private readonly IDistributedCache _distributedCache;
 
         private readonly ILogger<UserMicroserviceClient> _logger;
-        public UserMicroserviceClient(HttpClient httpClient, ILogger<UserMicroserviceClient> logger)
+        public UserMicroserviceClient(HttpClient httpClient, ILogger<UserMicroserviceClient> logger, IDistributedCache distributedCache)
         {
              _httpClient = httpClient;
             _logger = logger;
+            _distributedCache = distributedCache;
         }
 
         public async Task<UserDTO?> GetUserByUserID(Guid userID)
@@ -28,11 +32,34 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
 
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync($"/api/users/{userID}");
+                //using cache before hitting api
+                string cacheKey = $"user:{userID}";
+                string? cachedUser = await _distributedCache.GetStringAsync(cacheKey);
+
+                if (cachedUser != null)
+                {
+                    UserDTO? cacheduser = JsonSerializer.Deserialize<UserDTO>(cachedUser);
+                    return cacheduser;
+                }
+
+                // if data not found hitting api
+
+                HttpResponseMessage response = await _httpClient.GetAsync($"/gateway/users/{userID}");   
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    if(response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                    {
+                        UserDTO? userFromFallBack = await response.Content.ReadFromJsonAsync<UserDTO?>();
+
+                        if (userFromFallBack == null)
+                        {
+
+                            throw new NotImplementedException("fallBack policy was not implemented");
+                        }
+                        return userFromFallBack;
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
                         return null;
                     }
@@ -54,12 +81,22 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.HttpClients
                     UserDTO? user = await response.Content.ReadFromJsonAsync<UserDTO?>();
 
                     if (user == null)
-                    {
-
+                    { 
                         throw new ArgumentException("Invalid user ID");
                     }
 
-                    return user;
+                // adding product in cache
+                string userJson = JsonSerializer.Serialize(user);
+
+                DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
+                     .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
+                     .SetSlidingExpiration(TimeSpan.FromSeconds(100));
+
+                string cacheKeyToWrite = $"user:{userID}";
+                await _distributedCache.SetStringAsync(cacheKeyToWrite, userJson, options);
+
+
+                return user;
 
             }   catch(BrokenCircuitException ex)
             {
