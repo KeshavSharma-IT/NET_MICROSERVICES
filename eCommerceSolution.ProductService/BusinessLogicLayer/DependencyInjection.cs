@@ -1,5 +1,6 @@
 ﻿using eCommerce.BusinessLogicLayer.IServices;
 using eCommerce.BusinessLogicLayer.Mappers;
+using eCommerce.BusinessLogicLayer.RabbitMQ;
 using eCommerce.BusinessLogicLayer.Services;
 using eCommerce.BusinessLogicLayer.Validators;
 using FluentValidation;
@@ -22,6 +23,7 @@ namespace eCommerce.BusinessLogicLayer
 
 
             services.AddScoped<IProductServices,ProductService>();
+            services.AddTransient<IRabbitMQPublisher, RabbitMQPublisher>();
 
             services.AddValidatorsFromAssemblyContaining<ProductAddRequestValidator>();  //REGISTER VALIDATORS ONLY 1 REGESTER WILL WORK FOR ALL
             return services;

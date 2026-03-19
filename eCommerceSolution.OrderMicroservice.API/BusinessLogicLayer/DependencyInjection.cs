@@ -6,6 +6,7 @@ using eCommerce.OrderMicroservice.BusinessLogicLayer.Validators;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ;
 
 namespace eCommerce.OrderMicroservice.BusinessLogicLayer
 {
@@ -26,6 +27,8 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer
                 options.Configuration = $"{configuration["REDIS_HOST"]}:{configuration["REDIS_PORT"]}";
             });
 
+            services.AddTransient<IRabbitMQProductNameUpdateConsumer, RabbitMQProductNameUpdateConsumer>();
+            services.AddHostedService<RabbitMQProductNameUpdateHostedService>();
             return services;
         }
     }
