@@ -73,6 +73,23 @@ namespace eCommerce.BusinessLogicLayer.Services
 
             //attempt to delete
             bool isdeleted= await _productRepository.DeleteProduct(id);
+
+            //adding code for posting a message to message queue that
+            //announces the consumers about the deleted product details
+            if (isdeleted)
+            {
+                ProductDeletingMessage message=new ProductDeletingMessage(exitingProduct.ProductID,exitingProduct.ProductName);
+
+                //string routingKey = "product.delete";
+                //_rabbitMQPublisher.Publish<ProductDeletingMessage>(routingKey, message);
+                var headers = new Dictionary<string, object>() {
+                     {"event", "product.delete"},
+                      {"RowCount",1 }
+                };
+                _rabbitMQPublisher.Publish<ProductDeletingMessage>(headers, message);
+            }
+
+
             return isdeleted;
         }
 
@@ -127,18 +144,25 @@ namespace eCommerce.BusinessLogicLayer.Services
 
             //check if product name is changed
 
-            bool isProductNameChange= request.ProductName!=exitingProduct.ProductName;
+            //bool isProductNameChange= request.ProductName!=exitingProduct.ProductName;
 
 
             Product? Updatedproduct= await _productRepository.UpdateProduct(productInput);
 
-            if (isProductNameChange)
-            {
-                string routingKey = "product.update.name";
-                var message = new ProductNameUpdateMessage(productInput.ProductID, productInput.ProductName);
+            //if (isProductNameChange)
+            //{
+                //var message = new ProductNameUpdateMessage(productInput.ProductID, productInput.ProductName);
+
+                //string routingKey = "product.update.name";
+                //_rabbitMQPublisher.Publish<ProductNameUpdateMessage>(routingKey,message);
+                var headers = new Dictionary<string, object>() {
+                     {"event", "product.update"},
+                      {"RowCount",1 }
+                };
                 
-                _rabbitMQPublisher.Publish<ProductNameUpdateMessage>(routingKey,message);
-            }
+                //_rabbitMQPublisher.Publish<ProductNameUpdateMessage>(headers, message);
+                _rabbitMQPublisher.Publish<Product>(headers, productInput);
+            //}
 
             ProductResponce UpdatedproductMap = _mapper.Map<ProductResponce>(Updatedproduct);
 

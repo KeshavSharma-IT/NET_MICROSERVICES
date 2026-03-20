@@ -9,19 +9,19 @@ using System.Text.Json;
 
 namespace eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ
 {
-    public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNameUpdateConsumer
+    public class RabbitMQProductDeletionConsumer : IDisposable  , IRabbitMQProductDeletionConsumer
     {
         private readonly IConfiguration _configuration;
         private readonly IModel _channel;
         private readonly IConnection _connection;
-        private readonly ILogger<RabbitMQProductNameUpdateConsumer> _logger;
+        private readonly ILogger<RabbitMQProductDeletionConsumer> _logger;
         private readonly IDistributedCache _distributedCache;
 
-        public RabbitMQProductNameUpdateConsumer(IConfiguration configuration, ILogger<RabbitMQProductNameUpdateConsumer> logger, IDistributedCache distributedCache)
+        public RabbitMQProductDeletionConsumer(IConfiguration configuration, ILogger<RabbitMQProductDeletionConsumer> logger, IDistributedCache distributedCache)
         {
             _configuration = configuration;
             _logger = logger;
-            _distributedCache= distributedCache;
+            _distributedCache = distributedCache;
 
             string hostName = _configuration["RabbitMQ_HostName"]!;
             string userName = _configuration["RabbitMQ_UserName"]!;
@@ -43,13 +43,13 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ
 
         public void Consume()
         {
-            //string routingKey = "product.update.name";  // use for direct/fallout/topic exchange
+            //string routingKey = "ProductID.delete";
             var headers = new Dictionary<string, object>() {
                      { "x-match","all"},
-                     {"event", "product.update"},
+                     {"event", "product.delete"},
                      {"RowCount",1 }
                 };
-            string queueName = "orders.product.update.name.queue";
+            string queueName = "orders.product.delete.queue";
 
             //Create exchange
             string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
@@ -67,18 +67,18 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
-            consumer.Received += async (sender, args) => 
+            consumer.Received += async(sender, args) => 
             {
                 byte[] body= args.Body.ToArray();
                 string message = Encoding.UTF8.GetString(body);
                 if (message != null) {
-                    //ProductNameUpdateMessage productNameUpdateMessage= JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
-                    ProductDTO? productNameUpdateMessage = JsonSerializer.Deserialize<ProductDTO>(message);
+                    ProductDeletingMessage productDeletingMessage = JsonSerializer.Deserialize<ProductDeletingMessage>(message);
 
-                    //_logger.LogInformation($"Product name update: {productNameUpdateMessage.ProductID}, and new name:{productNameUpdateMessage.NewName}");
+                    if (productDeletingMessage != null) {                     
+                        _logger.LogInformation($"Product deleted: {productDeletingMessage.ProductID}, and Product name:{productDeletingMessage.ProductName}");
+                        await HandleProductDeletion(productDeletingMessage.ProductID);
+                    }
 
-                    //Update products cache
-                  await  HandleProductUpdation(productNameUpdateMessage);
                 }
             };
 
@@ -92,19 +92,14 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ
             _connection.Dispose();
         }
 
-
-        private async Task HandleProductUpdation (ProductDTO product)
+        private async Task HandleProductDeletion(Guid ProductID)
         {
-            string productJson = JsonSerializer.Serialize(product);
+           
 
-            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
-                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
-                 .SetSlidingExpiration(TimeSpan.FromSeconds(100));
+            string cacheKeyToWrite = $"product:{ProductID}";
+            await _distributedCache.RemoveAsync(cacheKeyToWrite);
 
-            string cacheKeyToWrite = $"product:{product.ProductID}";
-            await _distributedCache.SetStringAsync(cacheKeyToWrite, productJson, options);
-
-            _logger.LogInformation($"Product name update: {product.ProductID}, and new name:{product.ProductName}");
+            
         }
     }
 }

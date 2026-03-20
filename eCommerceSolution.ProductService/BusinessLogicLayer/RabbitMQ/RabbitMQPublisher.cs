@@ -35,7 +35,8 @@ public class RabbitMQPublisher : IRabbitMQPublisher, IDisposable
     }
 
 
-    public void Publish<T>(string routingKey, T message)
+    //public void Publish<T>(string routingKey, T message)  use it for direct/fallout/topic exchnage
+    public void Publish<T>(Dictionary<string,object> header, T message)
     {
         string messageJson = JsonSerializer.Serialize(message);
         byte[] messageBodyInBytes = Encoding.UTF8.GetBytes(messageJson);
@@ -43,10 +44,13 @@ public class RabbitMQPublisher : IRabbitMQPublisher, IDisposable
         //Create exchange
         //string exchangeName = "product.exchange";
         string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
-        _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct, durable: true);
+        _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Headers, durable: true);
 
         //Publish message
-        _channel.BasicPublish(exchange: exchangeName, routingKey: routingKey, basicProperties: null, body: messageBodyInBytes);
+        //_channel.BasicPublish(exchange: exchangeName, routingKey: routingKey, basicProperties: null, body: messageBodyInBytes); \
+        var basicProperties=_channel.CreateBasicProperties();
+        basicProperties.Headers=header;
+        _channel.BasicPublish(exchange: exchangeName, routingKey: string.Empty, basicProperties: basicProperties, body: messageBodyInBytes);
     }
 
     public void Dispose()
