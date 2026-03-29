@@ -33,6 +33,7 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
                 {
                     return Results.NotFound();
                 }
+
                 return Results.Ok(productResponces);
 
             });

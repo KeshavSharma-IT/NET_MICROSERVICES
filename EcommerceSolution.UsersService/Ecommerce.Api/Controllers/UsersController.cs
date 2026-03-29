@@ -27,6 +27,8 @@ namespace Ecommerce.Api.Controllers
                 return BadRequest("Invalid UserID");
             }
 
+
+
            UserDTO? responce= await _usersService.GetUserByUserID(userID);
 
             if (responce == null)

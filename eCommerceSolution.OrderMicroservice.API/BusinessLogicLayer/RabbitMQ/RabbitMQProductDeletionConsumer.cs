@@ -23,17 +23,26 @@ namespace eCommerce.OrderMicroservice.BusinessLogicLayer.RabbitMQ
             _logger = logger;
             _distributedCache = distributedCache;
 
+            Console.WriteLine($"RabbitMQ_HostName:{_configuration["RabbitMQ_HostName"]}");
+            Console.WriteLine($"RabbitMQ_UserName:{_configuration["RabbitMQ_UserName"]}");
+            Console.WriteLine($"RabbitMQ_Password:{_configuration["RabbitMQ_Password"]}");
+            Console.WriteLine($"RabbitMQ_Port:{_configuration["RabbitMQ_Port"]}");
+
             string hostName = _configuration["RabbitMQ_HostName"]!;
             string userName = _configuration["RabbitMQ_UserName"]!;
             string password = _configuration["RabbitMQ_Password"]!;
-            string port = _configuration["RabbitMQ_Port"]!;
+            //string port = _configuration["RabbitMQ_Port"]!;
+            int port = Convert.ToInt32(_configuration["RabbitMQ_Port"]);
+
+
 
             ConnectionFactory connectionFactory = new ConnectionFactory()
             {
                 HostName = hostName,
                 UserName = userName,
                 Password = password,
-                Port = Convert.ToInt32(port)
+                Port = port,
+
             };
             _connection = connectionFactory.CreateConnection();
 
