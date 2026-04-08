@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- master
+- Dev
 
 resources:
 - repo: self
@@ -11,10 +11,15 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '794caa02-8086-499c-aa98-c87d91cf72e8'
-  imageRepository: 'productsmicroservice'
+  imageRepository: 'products-microservice'
   containerRegistry: 'keshavecommerceregistry.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/ProductMicroService.Api/Dockerfile'
   tag: '$(Build.BuildId)'
+  windowsImageName: 'windows-latest'
+  aksClusterName: ecommerce-aks-cluster
+  aksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1775394560548
+  deploymentFile: '$(Build.SourcesDirectory)/k8s/deployment.yaml'
+
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -34,6 +39,73 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
+        buildContext: $(Build.SourcesDirectory) 
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+
+- stage: Test
+  displayName: Test and publish results stage
+  jobs:
+  - job: RunTest
+    displayName: Run Unit tests
+    pool:
+     vmImage: $(windowsImageName)
+    steps:
+    - checkout: self
+      displayName: Checkout source code
+
+    - task: NuGetToolInstaller@1
+      displayName: Install NuGetTool
+
+    - task: NuGetCommand@2
+      displayName: Restore NuGet Packages
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/eCommerceSolution.ProductService.sln'
+
+    - task: MSBuild@1
+      displayName: Build solution
+      inputs:
+        solution: '**/eCommerceSolution.ProductService.sln'
+        msbuildArchitecture: 'x64'
+        platform: 'Any CPU'
+        configuration: 'Debug'
+    
+    - task: VSTest@3
+      displayName: Test Solution
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\ProductsUnitTests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runTestsInIsolation: true
+        codeCoverageEnabled: true
+
+- stage: DeployToDev
+  displayName: Deploy to Dev
+  dependsOn: Test
+  condition: and(succeeded('Build'),eq(variables['Build.SourceBranch'],'refs/heads/Dev'))
+
+  jobs:
+  - deployment: DeploymentToDev
+    displayName: Deployement to Dev Environment
+    environment: dev
+    strategy: 
+      runOnce: 
+        deploy:
+            steps:
+            - checkout: self
+              displayName: checkout source code
+
+
+            - script:  |
+                echo "Listing contents of k8s"
+                ls -l $(Build.SourcesDirectory)/k8s/
+              displayName: 'List Files in k8s Directory'
+
+  
+
+

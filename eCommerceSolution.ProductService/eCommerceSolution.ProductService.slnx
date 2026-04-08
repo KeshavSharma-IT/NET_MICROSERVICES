@@ -2,4 +2,5 @@
   <Project Path="BusinessLogicLayer/BusinessLogicLayer.csproj" />
   <Project Path="DataAccessLayer/DataAccessLayer.csproj" />
   <Project Path="ProductMicroService.Api/ProductMicroService.Api.csproj" />
+  <Project Path="ProductsUnitTests/ProductsUnitTests.csproj" Id="7aad12ee-2632-463b-9aa8-aaf6e6576001" />
 </Solution>
