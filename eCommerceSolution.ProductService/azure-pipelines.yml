@@ -3,7 +3,13 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- Dev
+  branches:
+    include:
+      - Dev
+      - qa
+      - uat
+      - staging
+      - prod
 
 resources:
 - repo: self
@@ -17,12 +23,21 @@ variables:
   tag: '$(Build.BuildId)'
   windowsImageName: 'windows-latest'
   aksClusterName: ecommerce-aks-cluster
-  aksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1775394560548
-  deploymentFile: '$(Build.SourcesDirectory)/k8s/deployment.yaml'
+  devAksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1775394560548
+  qaAksServiceConnectionName: qa-ecommerce-aks-cluster-qa-1775394682264
+  uatAksServiceConnectionName: uat-ecommerce-aks-cluster-uat-1775394744124
+  stagingAksServiceConnectionName: staging-ecommerce-aks-cluster-staging-1775394816098
+  prodAksServiceConnectionName: prod-ecommerce-aks-cluster-prod-1775394858916
+  # deploymentFile: '$(Build.SourcesDirectory)/k8s/deployment.yaml'
+  devKubernetesNamespace: 'dev'
+  qaKubernetesNamespace: 'qa'
+  uatKubernetesNamespace: 'uat'
+  stagingKubernetesNamespace: 'staging'
+  prodKubernetesNamespace: 'prod'
 
 
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+  linuxImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
@@ -31,7 +46,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
-      vmImage: $(vmImageName)
+      vmImage: $(linuxImageName)
     steps:
     - task: Docker@2
       displayName: Build and push an image to container registry
@@ -50,7 +65,7 @@ stages:
   - job: RunTest
     displayName: Run Unit tests
     pool:
-     vmImage: $(windowsImageName)
+      vmImage: $(windowsImageName)
     steps:
     - checkout: self
       displayName: Checkout source code
@@ -87,11 +102,11 @@ stages:
 - stage: DeployToDev
   displayName: Deploy to Dev
   dependsOn: Test
-  condition: and(succeeded('Build'),eq(variables['Build.SourceBranch'],'refs/heads/Dev'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/Dev'))
 
   jobs:
   - deployment: DeploymentToDev
-    displayName: Deployement to Dev Environment
+    displayName: Deployment to Dev Environment
     environment: dev
     strategy: 
       runOnce: 
@@ -100,12 +115,23 @@ stages:
             - checkout: self
               displayName: checkout source code
 
-
             - script:  |
                 echo "Listing contents of k8s"
-                ls -l $(Build.SourcesDirectory)/k8s/
-              displayName: 'List Files in k8s Directory'
+                ls -l $(Build.SourcesDirectory)/k8s/dev
+              displayName: 'List Files in k8s/dev Directory'
 
-  
+            - script:  |
+                
+                find $(Build.SourcesDirectory)/k8s/dev -type f \( -name "*.yaml" -o -name "*.yml" \) -exec sed -i 's/__TAG__/$(tag)/g' {} +
+              displayName: 'Replace image tag in all deployment files'
+
+            - task: Kubernetes@1
+              displayName: 'Deploy to dev namespace in  kubernetes'
+              inputs:
+                kubernetesServiceEndpoint: $(devAksServiceConnectionName)
+                kubernetesCluster: $(aksClusterName)
+                namespace: $(devKubernetesNamespace)
+                command: apply
+                arguments: '-f $(Build.SourcesDirectory)/k8s/dev/.'
 
 
