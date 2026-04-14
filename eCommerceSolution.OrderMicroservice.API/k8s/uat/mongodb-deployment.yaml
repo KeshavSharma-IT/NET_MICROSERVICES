@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb-deployment  
+  name: mongodb-deployment
   labels:
     app: mongodb
 spec:
@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: mongodb
-        image: keshavecommerceregistry.azurecr.io/ecommerce-mongodb:latest
+        image: keshavecommerceregistry.azurecr.io/ecommerce-mongodb:__TAG__
         ports:
         - containerPort: 27017

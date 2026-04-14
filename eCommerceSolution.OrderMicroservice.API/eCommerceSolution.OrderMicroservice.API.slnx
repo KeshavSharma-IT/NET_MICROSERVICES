@@ -6,4 +6,5 @@
     <Build />
   </Project>
   <Project Path="OrderMicroservice.API/OrderMicroservice.API.csproj" />
+  <Project Path="OrdersUnitTests/OrdersUnitTests.csproj" Id="3abacb05-5907-487b-a3e5-460c94c39eae" />
 </Solution>

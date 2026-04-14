@@ -2,4 +2,5 @@
   <Project Path="Ecommerce.Api/Ecommerce.Api.csproj" />
   <Project Path="Ecommerce.Core/Ecommerce.Core.csproj" />
   <Project Path="Ecommerce.Infrastructure/Ecommerce.Infrastructure.csproj" />
+  <Project Path="UsersUnitTests/UsersUnitTests.csproj" Id="7136d5a9-378b-4e07-80d3-de2217f07460" />
 </Solution>
