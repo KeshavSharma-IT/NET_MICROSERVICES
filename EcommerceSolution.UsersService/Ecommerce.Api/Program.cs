@@ -39,18 +39,18 @@ builder.Services.AddCors(option =>
 });
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 //Exception Handling middleware
 app.UseExceptionHandlingMiddleware();
 
 
 //routing
 app.UseRouting();
-
-
-//swagger end point
-
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseCors();
 

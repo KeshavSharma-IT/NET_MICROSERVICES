@@ -23,11 +23,13 @@ variables:
   tag: '$(Build.BuildId)'
   windowsImageName: 'windows-latest'
   aksClusterName: ecommerce-aks-cluster
-  devAksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1775394560548
-  qaAksServiceConnectionName: qa-ecommerce-aks-cluster-qa-1775394682264
-  uatAksServiceConnectionName: uat-ecommerce-aks-cluster-uat-1775394744124
-  stagingAksServiceConnectionName: staging-ecommerce-aks-cluster-staging-1775394816098
-  prodAksServiceConnectionName: prod-ecommerce-aks-cluster-prod-1775394858916
+  devAksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1776255362268
+  qaAksServiceConnectionName: qa-ecommerce-aks-cluster-qa-1776256444480
+  uatAksServiceConnectionName: uat-ecommerce-aks-cluster-uat-1776256625279
+  stagingAksServiceConnectionName: staging-ecommerce-aks-cluster-staging-1776256498101
+  prodAksServiceConnectionName: prod-ecommerce-aks-cluster-prod-1776256240725
+  resourceGroupServiceConnectionName: ecommerce-resource-group-connection
+  keyVaultName: products-pipeline-kv-1
   # deploymentFile: '$(Build.SourcesDirectory)/k8s/deployment.yaml'
   # devKubernetesNamespace: 'dev'
   # qaKubernetesNamespace: 'qa'
@@ -40,6 +42,25 @@ variables:
   linuxImageName: 'ubuntu-latest'
 
 stages:
+- stage: InitializeKeyVault
+  displayName: Initialize key vault Secrets
+  jobs:
+  - job: FetchSecrets
+    displayName: Fetch key vault Secrets
+    pool:
+      vmImage: '$(linuxImageName)'
+    steps:
+      - task: AzureKeyVault@2
+        displayName: Fetch Key Vault secrets
+        inputs:
+          azureSubscription: $(resourceGroupServiceConnectionName)
+          keyVaultName: '$(keyVaultName)'
+          SecretsFilter: '*'
+          RunAsPreJob: true
+
+
+
+
 - stage: Build
   displayName: Build and push stage
   jobs:

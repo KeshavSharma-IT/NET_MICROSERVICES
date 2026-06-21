@@ -21,7 +21,7 @@ spec:
         - containerPort: 8080
         env:
         - name: ASPNETCORE_ENVIRONMENT
-          value: Development
+          value: QA
         - name: MYSQL_HOST
           value: mysql
         - name: MYSQL_PORT

@@ -21,6 +21,8 @@ namespace eCommerce.ProductMicroService.Api.ApiEndPoints
 
             });
 
+
+
             //Get   api/products/search/productId/12
             app.MapGet("/api/products/search/productId/{ProductID:Guid}", async (IProductServices productServices,Guid ProductID) =>
             {

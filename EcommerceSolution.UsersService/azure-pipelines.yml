@@ -23,11 +23,11 @@ variables:
   tag: '$(Build.BuildId)'
   windowsImageName: 'windows-latest'
   aksClusterName: ecommerce-aks-cluster
-  devAksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1775394560548
-  qaAksServiceConnectionName: qa-ecommerce-aks-cluster-qa-1775394682264
-  uatAksServiceConnectionName: uat-ecommerce-aks-cluster-uat-1775394744124
-  stagingAksServiceConnectionName: staging-ecommerce-aks-cluster-staging-1775394816098
-  prodAksServiceConnectionName: prod-ecommerce-aks-cluster-prod-1775394858916
+  devAksServiceConnectionName: dev-ecommerce-aks-cluster-dev-1776255362268
+  qaAksServiceConnectionName: qa-ecommerce-aks-cluster-qa-1776256444480
+  uatAksServiceConnectionName: uat-ecommerce-aks-cluster-uat-1776256625279
+  stagingAksServiceConnectionName: staging-ecommerce-aks-cluster-staging-1776256498101
+  prodAksServiceConnectionName: prod-ecommerce-aks-cluster-prod-1776256240725
  
 
 
