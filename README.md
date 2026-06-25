@@ -195,29 +195,38 @@ The project includes Azure DevOps pipeline configuration to automate:
 
 This project was built to gain hands-on experience with:
 
-* Microservices Architecture
-* Distributed Systems
-* Containerization
-* Kubernetes
-* Clean Architecture
-* Entity Framework Core
-* Dapper
-* Azure DevOps
-* RabbitMQ
-* Redis
-* API Design
-* RESTful Services
+# ✨ Features
+
+- Microservices Architecture
+- RESTful APIs
+- API Gateway
+- JWT Authentication & Refresh Tokens
+- Role-Based Authorization
+- API Rate Limiting
+- Entity Framework Core
+- Dapper
+- Repository Pattern
+- Dependency Injection
+- Clean Architecture
+- Docker & Docker Compose
+- Kubernetes (AKS)
+- RabbitMQ Messaging
+- Redis Caching
+- Serilog Structured Logging
+- Polly Resilience Policies
+- Azure DevOps CI/CD
+- Exception Handling Middleware
+- Global Error Handling
+- Validation
+- Unit Testing
 
 ---
 
 # 🚀 Future Improvements
 
-* JWT Refresh Token
-* API Rate Limiting
-* Distributed Logging (Serilog + Elasticsearch)
+
 * OpenTelemetry
 * Health Checks
-* Circuit Breaker (Polly)
 * Distributed Tracing
 * Event Sourcing
 * Saga Pattern
